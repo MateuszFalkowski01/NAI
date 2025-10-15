@@ -1,3 +1,6 @@
+title: "Misère Nim Game Configuration"
 piles_number: 4
 max_stones_per_pile: 13
 min_stones_per_pile: 2
+ai_play: true # Set to true for human vs AI, false for human vs human
+ai_depth: 3 # Negamax search depth for the AI player (plies)

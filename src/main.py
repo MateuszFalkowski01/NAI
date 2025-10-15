@@ -1,8 +1,8 @@
-"""Command-line two-player misère Nim.
+r"""Command-line two-player misère Nim.
 
 Players alternate removing stones from a single pile. In misère Nim,
 the player who takes the last remaining stone loses.
-Configuration is read from config.yaml. Logging goes to run.log.
+Configuration is read from config.yaml (YAML) where you also pick the play mode. Logging goes to run.log.
 
 https://www.hackerrank.com/challenges/misere-nim-1/problem
 
@@ -23,11 +23,11 @@ run instructions:
      Windows:
         1) Create venv
             py -m venv venv
-            .\venv\Scripts\Activate.ps1
+            .\\venv\\Scripts\\Activate.ps1
         2) Install dependencies
             pip install -r requirements.txt
         3) Run
-            python .\src\main.py
+            python .\\src\\main.py
 """
 # only for random initial state
 import random
@@ -42,6 +42,7 @@ CONFIG_PATH = ROOT / "config.yaml"
 LOG_PATH = ROOT / "run.log"
 
 from state import GameState, Player
+from ai_agent import MisereNimAI
 
 
 def load_config():
@@ -58,19 +59,24 @@ def load_config():
         sys.exit(1)
 
 def initialize_game():
-    """Initialize a two-player misère Nim game from config.
+    """Initialize a misère Nim game from config.
 
-    - piles_number must be > 0
-    - min_stones_per_pile < max_stones_per_pile
-    - Mode is human vs human (misère Nim: last stone loses)
-
-    Returns: (GameState, mode_description)
+    Returns a tuple: (GameState, mode_description, ai_enabled, ai_depth).
     """
     config = load_config()
 
     piles_number = config.get("piles_number", 3)
     min_stones = config.get("min_stones_per_pile", 1)
     max_stones = config.get("max_stones_per_pile", 5)
+    ai_enabled = bool(config.get("ai_play", False))
+    try:
+        ai_depth = int(config.get("ai_depth", 9))
+    except (TypeError, ValueError):
+        print("Error: ai_depth must be an integer")
+        sys.exit(1)
+    if ai_depth <= 0:
+        print("Error: ai_depth must be > 0")
+        sys.exit(1)
 
     if piles_number <= 0:
         print("Error: piles_number must be > 0")
@@ -82,18 +88,19 @@ def initialize_game():
 
     piles = [random.randint(min_stones, max_stones) for _ in range(piles_number)]
 
-    # Two-player human vs human, misère Nim rules
-    mode_desc = "two-player (misère Nim)"
+    mode_desc = "human vs AI (misère Nim)" if ai_enabled else "two-player (misère Nim)"
     current = Player.HUMAN
 
     state = GameState(piles=piles, current_player=current)
 
     # log config and initial state here so main doesn't need the config object
     logging.info("Loaded config: %s", {k: config.get(k) for k in ("piles_number", "min_stones_per_pile", "max_stones_per_pile")})
+    logging.info("AI enabled: %s", ai_enabled)
+    logging.info("AI depth: %d", ai_depth)
     logging.info("Mode: %s (last stone loses)", mode_desc)
     logging.info("Initial state: piles=%s current_player=%s", state.piles, state.current_player.name)
 
-    return state, mode_desc
+    return state, mode_desc, ai_enabled, ai_depth
 
 def main():
     """Run a two-player misère Nim game in the terminal.
@@ -103,29 +110,37 @@ def main():
     """
     # configure logging: truncate the log file at each run
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s", filename=str(LOG_PATH), filemode="w")
-    logging.info("Starting new game run (two-player misère Nim)")
-    state, mode_desc = initialize_game()
+    logging.info("Starting new game run (misère Nim)")
+    state, mode_desc, ai_enabled, ai_depth = initialize_game()
     print(f"Mode: {mode_desc}")
     print("Initial game state:")
     render_game(state)
 
+    ai_player = MisereNimAI(depth=ai_depth) if ai_enabled else None
+
     # Human vs Human loop
     human_turn = 1  # 1 or 2
     while True:
-        print(f"\nCurrent player: Player {human_turn}")
+        state.current_player = Player.HUMAN if human_turn == 1 else Player.AI
+        player_label = "AI" if ai_enabled and human_turn == 2 else f"Player {human_turn}"
+        print(f"\nCurrent player: {player_label}")
         if is_game_over(state):
-            # Misère Nim: if no stones at start of a turn, previous player took the last and loses,
-            # so current player is the winner.
-            winner = human_turn
-            print(f"Game over. Winner: Player {winner}")
-            logging.info("Game over. Winner: Player %d", winner)
-            break
-
-        try:
-            pile, remove = get_human_move(state, player_label=f"Player {human_turn}")
-        except KeyboardInterrupt:
-            print("\nExiting.")
+            # Misère Nim: if no stones at start of a turn, the current player loses,
+            # so the opponent is the winner.
+            winner_label = "AI" if ai_enabled and human_turn == 1 else f"Player {3 - human_turn}"
+            print(f"Game over. Winner: {winner_label}")
+            logging.info("Game over. Winner: %s", winner_label)
             return
+
+        if ai_enabled and human_turn == 2:
+            pile, remove = ai_player.choose_move(state.piles)
+            print(f"AI removes {remove} from pile {pile + 1}")
+        else:
+            try:
+                pile, remove = get_human_move(state, player_label=f"Player {human_turn}")
+            except KeyboardInterrupt:
+                print("\nExiting.")
+                return
 
         apply_move(state, pile, remove)
         logging.info("Player %d move: pile=%d remove=%d", human_turn, pile + 1, remove)
