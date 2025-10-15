@@ -117,8 +117,6 @@ def main():
     render_game(state)
 
     ai_player = MisereNimAI(depth=ai_depth) if ai_enabled else None
-
-    # Human vs Human loop
     human_turn = 1  # 1 or 2
     while True:
         state.current_player = Player.HUMAN if human_turn == 1 else Player.AI
