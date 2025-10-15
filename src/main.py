@@ -125,9 +125,9 @@ def main():
         if is_game_over(state):
             # Misère Nim: if no stones at start of a turn, the current player loses,
             # so the opponent is the winner.
-            winner_label = "AI" if ai_enabled and human_turn == 1 else f"Player {3 - human_turn}"
-            print(f"Game over. Winner: {winner_label}")
-            logging.info("Game over. Winner: %s", winner_label)
+            loser_label = "AI" if ai_enabled and human_turn == 1 else f"Player {3 - human_turn}"
+            print(f"Game over. Loser: {loser_label}")
+            logging.info("Game over. Loser: %s", loser_label)
             return
 
         if ai_enabled and human_turn == 2:
