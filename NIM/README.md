@@ -1,5 +1,3 @@
-!!! Wersja do sprawdzenia to gałąź main !!!
-
 Players alternate removing stones from a single pile. In misère Nim,
 the player who takes the last remaining stone loses.
 Configuration is read from config.yaml (YAML) where you also pick the play mode. Logging goes to run.log.
