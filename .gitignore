@@ -20,3 +20,10 @@ Thumbs.db
 *.swo
 *.bak
 *.tmp
+
+# Local API key for movie_recommender (do not commit)
+movie_recommender/api_key.txt
+
+*.img
+*.jpg
+*.jpeg
