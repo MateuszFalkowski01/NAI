@@ -1,8 +1,6 @@
 from csv_read import load_data, create_user_item_matrix
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
-import random
-import requests
 import yaml
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import MultiLabelBinarizer
