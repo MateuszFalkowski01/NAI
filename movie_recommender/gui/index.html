@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silnik Rekomendacji Filmów</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-6xl">
+        <h1 class="text-2xl font-bold mb-6 text-center">Rekomendacje Filmów</h1>
+        
+        <label for="user-select" class="block text-sm font-medium text-gray-700 mb-2">Wybierz użytkownika:</label>
+        <select id="user-select" class="w-full p-2 border border-gray-300 rounded-md mb-4">
+        </select>
+        
+        <button id="recommend-btn" class="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">Generuj Rekomendacje</button>
+        
+        <div id="results" class="mt-6 hidden grid grid-cols-2 gap-6">
+            <div id="recommendation" class="p-6 bg-green-50 rounded-lg shadow-md">
+                <img id="rec-img" class="w-full min-h-96 object-contain mb-4 rounded" style="display: none;">
+                <h3 id="rec-title" class="font-bold text-center text-lg mb-2"></h3>
+                <p id="rec-overview" class="text-sm text-gray-600 mb-2 line-clamp-3"></p>
+                <p id="rec-genres" class="text-xs text-gray-500 mb-1"></p>
+                <p id="rec-date" class="text-xs"></p>
+            </div>
+            
+            <div id="anti-recommendation" class="p-6 bg-red-50 rounded-lg shadow-md">
+                <img id="anti-rec-img" class="w-full min-h-96 object-contain mb-4 rounded" style="display: none;">
+                <h3 id="anti-rec-title" class="font-bold text-center text-lg mb-2"></h3>
+                <p id="anti-rec-overview" class="text-sm text-gray-600 mb-2 line-clamp-3"></p>
+                <p id="anti-rec-genres" class="text-xs text-gray-500 mb-1"></p>
+                <p id="anti-rec-date" class="text-xs"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Funkcje wywoływane z Pythona
+        function setUsers(users) {
+            const select = document.getElementById('user-select');
+            select.innerHTML = '';
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user;
+                option.textContent = user;
+                select.appendChild(option);
+            });
+        }
+
+        function showResults(recInfo, antiRecInfo) {
+            const recImg = document.getElementById('rec-img');
+            if (recInfo.image) {
+                recImg.src = recInfo.image;
+                recImg.style.display = 'block';
+            } else {
+                recImg.style.display = 'none';
+            }
+            document.getElementById('rec-title').textContent = recInfo.title_pl || recInfo.title;
+            document.getElementById('rec-overview').textContent = recInfo.overview;
+            document.getElementById('rec-genres').textContent = 'Gatunki: ' + (recInfo.genres ? recInfo.genres.join(', ') : 'Brak');
+            document.getElementById('rec-date').textContent = recInfo.release_date;
+            
+            const antiRecImg = document.getElementById('anti-rec-img');
+            if (antiRecInfo.image) {
+                antiRecImg.src = antiRecInfo.image;
+                antiRecImg.style.display = 'block';
+            } else {
+                antiRecImg.style.display = 'none';
+            }
+            document.getElementById('anti-rec-title').textContent = antiRecInfo.title_pl || antiRecInfo.title;
+            document.getElementById('anti-rec-overview').textContent = antiRecInfo.overview;
+            document.getElementById('anti-rec-genres').textContent = 'Gatunki: ' + (antiRecInfo.genres ? antiRecInfo.genres.join(', ') : 'Brak');
+            document.getElementById('anti-rec-date').textContent = antiRecInfo.release_date;
+            
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        // Przycisk
+        document.getElementById('recommend-btn').addEventListener('click', () => {
+            const selectedUser = document.getElementById('user-select').value;
+            // Wywołaj funkcję Pythona
+            pywebview.api.get_recommendations(selectedUser);
+        });
+    </script>
+</body>
+</html>
