@@ -196,10 +196,10 @@ if __name__ == "__main__":
         print("Nieprawidłowa wartość. Wybieram pierwszego użytkownika.")
         selected_user = user_item_matrix.index[0]
     
-    print(f"\nLosowa rekomendacja dla {selected_user}:")
+    print(f"\nRekomendacja dla {selected_user}:")
     rec = recommend_movies(user_item_matrix, selected_user, clusters, movies_list)
     print(rec)
     
-    print(f"\nLosowa antyrekomendacja dla {selected_user}:")
+    print(f"\nAntyrekomendacja dla {selected_user}:")
     anti_rec = anti_recommend_movies(user_item_matrix, selected_user, clusters, movies_list)
     print(anti_rec)
