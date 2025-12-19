@@ -10,7 +10,7 @@ Mateusz Falkowski s27426
 ## Instrukcja użycia
 1. Zainstaluj wymagania: `pip install -r requirements.txt`
 2. Uruchom program z parametrami przykładu do predykcji np:
-python main.py --model 0 --wine_params "6.2,0.66,0.48,1.2,0.029,29,75,0.9892,3.33,0.39,12.8  
+python main.py --model 0 --wine_params 6.2,0.66,0.48,1.2,0.029,29,75,0.9892,3.33,0.39,12.8  
 python main.py --model 1 --path .\bird.jpg
 
 ## Confusion matrix
